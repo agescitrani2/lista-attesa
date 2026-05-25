@@ -170,6 +170,19 @@ function buildSummary() {
         </div>`;
 }
 
+// ---- Popup conferma ----
+function closePopup() {
+    document.getElementById('popupOverlay').classList.remove('visible');
+    document.getElementById(`step${currentStep}`).classList.remove('active');
+    currentStep = 4;
+    document.getElementById('step4').classList.add('active');
+    updateProgress();
+    document.getElementById('successName').textContent = document.getElementById('popupName').textContent;
+    document.getElementById('successId').textContent   = document.getElementById('popupId').textContent;
+    document.getElementById('successScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ---- Helpers ----
 function v(id) {
     const el = document.getElementById(id);
@@ -260,14 +273,9 @@ async function submitForm() {
         await db.collection('lista_attesa').doc(registrationId).set(data);
 
         document.getElementById('loadingOverlay').classList.remove('visible');
-        document.getElementById(`step${currentStep}`).classList.remove('active');
-        currentStep = 4;
-        document.getElementById('step4').classList.add('active');
-        updateProgress();
-        document.getElementById('successScreen').style.display = 'block';
-        document.getElementById('successName').textContent = `${data.bambino.nome} ${data.bambino.cognome}`;
-        document.getElementById('successId').textContent = registrationId;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('popupName').textContent = `${data.bambino.nome} ${data.bambino.cognome}`;
+        document.getElementById('popupId').textContent = registrationId;
+        document.getElementById('popupOverlay').classList.add('visible');
 
     } catch (err) {
         document.getElementById('loadingOverlay').classList.remove('visible');
