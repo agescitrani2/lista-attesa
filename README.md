@@ -19,17 +19,7 @@ Modulo web per l'iscrizione online in lista d'attesa del **Gruppo Scout AGESCI T
 5. In **Firestore Database**: crea il database in modalità produzione
 6. Imposta le **regole Firestore**:
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /lista_attesa/{docId} {
-      allow create: if true;          // chiunque può iscriversi
-      allow read, update, delete: if false; // solo admin (dal pannello)
-    }
-  }
-}
-```
+
 
 ## Deploy (GitHub Pages)
 
