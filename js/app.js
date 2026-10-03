@@ -170,14 +170,13 @@ function buildSummary() {
         </div>`;
 }
 
-// ---- Popup conferma ----
-function closePopup() {
-    document.getElementById('popupOverlay').classList.remove('visible');
+// ---- Schermata di conferma ----
+function showSuccess(nomeCompleto) {
     document.getElementById(`step${currentStep}`).classList.remove('active');
     currentStep = 4;
     document.getElementById('step4').classList.add('active');
     updateProgress();
-    document.getElementById('successName').textContent = document.getElementById('popupName').textContent;
+    document.getElementById('successName').textContent = nomeCompleto;
     document.getElementById('successScreen').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -323,8 +322,7 @@ async function submitForm() {
         await inviaRiepilogoMail(data); // non blocca l'iscrizione in caso di errore
 
         document.getElementById('loadingOverlay').classList.remove('visible');
-        document.getElementById('popupName').textContent = `${data.bambino.nome} ${data.bambino.cognome}`;
-        document.getElementById('popupOverlay').classList.add('visible');
+        showSuccess(`${data.bambino.nome} ${data.bambino.cognome}`);
 
     } catch (err) {
         document.getElementById('loadingOverlay').classList.remove('visible');
