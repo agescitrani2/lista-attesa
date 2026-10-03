@@ -178,7 +178,6 @@ function closePopup() {
     document.getElementById('step4').classList.add('active');
     updateProgress();
     document.getElementById('successName').textContent = document.getElementById('popupName').textContent;
-    document.getElementById('successId').textContent   = document.getElementById('popupId').textContent;
     document.getElementById('successScreen').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -195,9 +194,62 @@ function formatDate(dateStr) {
     return `${d}/${m}/${y}`;
 }
 
-function generateId() {
-    const rand = Math.random().toString(36).substring(2, 7).toUpperCase();
-    return `TR2-${new Date().getFullYear()}-${rand}`;
+// ---- Mail di riepilogo ----
+const MAIL_RIEPILOGO = 'agescitrani2@gmail.com';
+
+function righeGenitore(g) {
+    return {
+        'Nome': g.nome,
+        'Cognome': g.cognome,
+        'Luogo di nascita': g.luogo_nascita,
+        'Data di nascita': formatDate(g.data_nascita),
+        'Codice fiscale': g.codice_fiscale,
+        'Indirizzo': `${g.via} ${g.numero}, ${g.cap} ${g.citta} (${g.provincia})`,
+        'Email': g.email,
+        'Telefono': g.telefono
+    };
+}
+
+async function inviaRiepilogoMail(d) {
+    const payload = {
+        _subject: `Nuova iscrizione lista d'attesa: ${d.bambino.nome} ${d.bambino.cognome}`,
+        _template: 'table',
+        _captcha: 'false',
+        _replyto: d.genitore1.email,
+        'Tipo genitore': d.tipo_genitore === 'entrambi' ? 'Entrambi i genitori' : 'Unico genitore / tutore'
+    };
+    const aggiungi = (prefisso, obj) =>
+        Object.entries(obj).forEach(([k, val]) => { payload[`${prefisso} - ${k}`] = val || '—'; });
+
+    aggiungi('Genitore 1', righeGenitore(d.genitore1));
+    if (d.genitore2) aggiungi('Genitore 2', righeGenitore(d.genitore2));
+    aggiungi('Ragazzo/a', {
+        'Nome': d.bambino.nome,
+        'Cognome': d.bambino.cognome,
+        'Luogo di nascita': d.bambino.luogo_nascita,
+        'Data di nascita': formatDate(d.bambino.data_nascita),
+        'Codice fiscale': d.bambino.codice_fiscale,
+        'Residente a': d.bambino.residente_a,
+        'Via / Piazza': d.bambino.via
+    });
+    payload['Fratelli/sorelle in AGESCI'] = d.fratelli_agesci.presente ? `Sì: ${d.fratelli_agesci.nome}` : 'No';
+    payload['Parrocchia'] = d.parrocchia || '—';
+    payload['Motivazione'] = d.motivazione || '—';
+    payload['Hobby'] = d.hobby || '—';
+    payload['Altre informazioni'] = d.altre_info || '—';
+    payload['Consenso privacy'] = d.privacy.consenso ? 'Sì' : 'No';
+    payload['Data presentazione'] = formatDate(d.privacy.data_presentazione);
+    payload['Luogo'] = d.privacy.luogo;
+
+    try {
+        await fetch(`https://formsubmit.co/ajax/${MAIL_RIEPILOGO}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (err) {
+        console.warn('Invio mail di riepilogo non riuscito:', err);
+    }
 }
 
 // ---- Invio form ----
@@ -208,10 +260,7 @@ async function submitForm() {
     btnSubmit.disabled = true;
     document.getElementById('loadingOverlay').classList.add('visible');
 
-    const registrationId = generateId();
-
     const data = {
-        registrationId,
         tipo_genitore: tipoGenitore,
         genitore1: {
             nome:           v('g1Nome'),
@@ -270,11 +319,11 @@ async function submitForm() {
     };
 
     try {
-        await db.collection('lista_attesa').doc(registrationId).set(data);
+        await db.collection('lista_attesa').add(data);
+        await inviaRiepilogoMail(data); // non blocca l'iscrizione in caso di errore
 
         document.getElementById('loadingOverlay').classList.remove('visible');
         document.getElementById('popupName').textContent = `${data.bambino.nome} ${data.bambino.cognome}`;
-        document.getElementById('popupId').textContent = registrationId;
         document.getElementById('popupOverlay').classList.add('visible');
 
     } catch (err) {

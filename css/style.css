@@ -447,19 +447,6 @@ body {
     margin: 0 auto 8px;
 }
 
-.success-id {
-    display: inline-block;
-    background: var(--agesci-bg);
-    border: 1.5px solid #D1C4E9;
-    border-radius: 8px;
-    padding: 8px 20px;
-    font-weight: 700;
-    color: var(--agesci-purple);
-    font-size: 1.1rem;
-    margin: 16px 0;
-    letter-spacing: 2px;
-}
-
 /* ---- Fratelli toggle ---- */
 .fratelli-group {
     display: flex;
@@ -552,27 +539,6 @@ body {
     font-size: 0.95rem;
     color: #444;
     margin: 0 0 20px;
-}
-
-.popup-id-label {
-    font-size: 0.75rem;
-    color: #999;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 6px;
-}
-
-.popup-id {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--agesci-purple);
-    background: var(--agesci-bg);
-    border: 1.5px solid #D1C4E9;
-    border-radius: 8px;
-    padding: 10px 20px;
-    display: inline-block;
-    letter-spacing: 0.08em;
-    margin-bottom: 16px;
 }
 
 .popup-subtext {
